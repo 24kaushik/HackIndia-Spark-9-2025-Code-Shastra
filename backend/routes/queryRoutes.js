@@ -22,7 +22,7 @@ queryRouter.post('/', async (req, res) => {
         }
 
         // Check if database doesn't have the information
-        if (data.answer === "Information Not available in the database") {
+        if (data.answer === "Information not available in the current database.") {
             const enhanced = await enhance(JSON.stringify(data), query);
             return res.json({ response: enhanced });
         }
