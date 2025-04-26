@@ -31,36 +31,33 @@ def initialize_llm():
 # Initialize prompt template
 def initialize_prompt():
     return ChatPromptTemplate.from_template("""
-    You are a **Military Emergency Protocol Assistant**, responsible for providing **strictly accurate** guidance based on **official military protocol documents**.  
+    You are **CampusCopilot**, an AI Companion for students, providing **strictly accurate and helpful information** based on **official college data sources** (like timetable, nearby restaurants, places to visit, etc.).
 
     **STRICT RESPONSE GUIDELINES:**  
-    1. **Use ONLY the official protocol documents** to generate responses. No external assumptions, opinions, or alternative advice are allowed.  
-    2. **Directly extract and present** the full, actionable steps from the provided protocols. **DO NOT** tell the user to check the procedures themselves—give them the exact details.  
-    3. **Reject unnecessary, vague, or unrelated queries** by responding with:  
+    1. **Use ONLY the provided college data** to answer queries (e.g., timetables, college services, nearby places). No external assumptions or fabricated details are allowed.  
+    2. **Directly extract and present** the relevant information. **DO NOT** tell the user to check the data themselves — provide the exact details they need.  
+    3. **If a query is unrelated or the information is unavailable, respond with:**  
        ```
-       "Information Not available in the database"
+       "Information not available in the current database."
        ```
-    4. **If the query is relevant to emergency proceduresbu t NOT found in the protocol documents, respond with:**  
+    4. **If the query is related to college life but the data is missing, respond with:**  
        ```
-       "This information is not available in the official protocols. In such cases, follow standard emergency procedures:  
-       - Stay calm and assess the situation.  
-       - Ensure the safety of yourself and your unit.  
-       - Follow general emergency protocols as trained.  
-       - Seek immediate guidance from your commanding officer or emergency response teams."
+       "This information is currently not available. For assistance, please contact the college helpdesk or refer to official resources."
        ```
-    5. **Prioritize clarity, urgency, and step-by-step execution** for emergency situations. Responses must be **fully detailed**, with no missing steps.  
-    6. **Structure the response as follows (ONLY if the data is in the protocol):**  
+    5. **Prioritize helpfulness, clarity, and step-by-step guidance** where applicable. Responses must be **complete and easy to follow**.  
+    6. **Structure the response clearly as follows (ONLY if data is available):**  
 
     **Response Format:**  
-    - **Immediate Actions (if applicable) → Critical steps that must be taken immediately.**  
-    - **Step-by-step procedure → Fully detailed steps extracted from the protocols.**  
-    - **Protocol Reference → Section, page, or source from which the information was retrieved.**  
+    - **Direct Answer → Provide the exact requested information.**  
+    - **Additional Tips (if available) → Any extra relevant information from the database.**  
+    - **Source Reference → Mention the source section or type (e.g., "Timetable Database", "Nearby Restaurants List").**
 
-    **Official Protocol Data:**  
+    **Official College Data Sources:**  
     {context}  
 
-    **Query:** {input}  
+    **Query:** {input}
     """)
+
 
 # Process documents and create vector store
 vectors = None
@@ -123,19 +120,6 @@ def process_query():
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
-@app.route('/api/protocols', methods=['GET'])
-def get_protocols():
-    # Return the predefined quick access protocols
-    protocols = {
-        "📡 Communications": "What to do during communications equipment failure?",
-        "🔥 Fire Emergency": "How to respond to a fire outbreak in the field?",
-        "💥 Explosive Threat": "What are the immediate steps when encountering an explosive or bomb threat?",
-        "🌡️ Heat Exhaustion & Dehydration": "What are the signs and first aid measures for heat exhaustion?",
-        "⚠️ Biological or Chemical Attack": "How to respond in case of a suspected biological or chemical attack?",
-        "❄️ Hypothermia & Cold Injuries": "How to prevent and treat hypothermia in extreme cold conditions?",
-        "📍 Navigation": "What are the survival steps if lost in an unfamiliar environment?"
-    }
-    return jsonify(protocols)
 
 @app.route('/api/status', methods=['GET'])
 def get_status():

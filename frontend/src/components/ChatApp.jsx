@@ -49,7 +49,7 @@ const ChatApp = () => {
       const fullText = data.response || "Sorry, I didn’t understand that.";
       let currentText = "";
       for (let i = 0; i < fullText.length; i++) {
-        await new Promise((resolve) => setTimeout(resolve, 5)); // Adjust typing speed here
+        await new Promise((resolve) => setTimeout(resolve, 2)); // Adjust typing speed here
         currentText += fullText[i];
         setMessages((prev) => {
           const updatedMessages = [...prev];
