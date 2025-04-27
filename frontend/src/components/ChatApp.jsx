@@ -12,7 +12,6 @@ const ChatApp = () => {
       sender: "bot",
     },
   ]);
-  const [isTyping, setIsTyping] = useState(false);
   const messagesEndRef = useRef(null);
 
   const scrollToBottom = () => {
@@ -28,7 +27,7 @@ const ChatApp = () => {
 
     const userMsg = { text: input, sender: "user" };
     setMessages((prev) => [...prev, userMsg]);
-    setIsTyping(true);
+
 
     try {
       const res = await fetch("http://localhost:3000/api/query/123", {
@@ -58,7 +57,6 @@ const ChatApp = () => {
         });
       }
 
-      setIsTyping(false);
     } catch (err) {
       console.error("Fetch error:", err);
       setMessages((prev) => [
@@ -68,7 +66,7 @@ const ChatApp = () => {
           sender: "bot",
         },
       ]);
-      setIsTyping(false);
+  
     }
   };
 
@@ -162,32 +160,6 @@ const ChatApp = () => {
                 </motion.div>
               ))}
 
-              {/* {isTyping && (
-                <motion.div
-                  initial={{ opacity: 0, y: 10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  className="flex justify-start mb-3"
-                >
-                  <div className="h-8 w-8 rounded-full bg-gradient-to-r from-blue-500 to-indigo-500 flex items-center justify-center mr-2 shadow-md">
-                    <span className="text-xs font-bold text-white">AI</span>
-                  </div>
-                  <div className="bg-gray-800/90 px-4 py-3 rounded-2xl rounded-bl-none shadow-md">
-                    <motion.div
-                      className="flex space-x-2"
-                      animate={{ y: [0, -3, 0] }}
-                      transition={{
-                        repeat: Infinity,
-                        duration: 1.5,
-                        ease: "easeInOut",
-                      }}
-                    >
-                      <div className="w-2 h-2 bg-blue-400 rounded-full"></div>
-                      <div className="w-2 h-2 bg-purple-400 rounded-full animation-delay-200"></div>
-                      <div className="w-2 h-2 bg-pink-400 rounded-full animation-delay-500"></div>
-                    </motion.div>
-                  </div>
-                </motion.div>
-              )} */}
               <div ref={messagesEndRef} />
             </AnimatePresence>
           </motion.div>
