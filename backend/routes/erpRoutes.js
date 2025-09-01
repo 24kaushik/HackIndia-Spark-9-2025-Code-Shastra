@@ -1,27 +1,13 @@
 import { Router } from "express";
-import expressAsyncHandler from "express-async-handler";
+import { fetchAssignments, fetchAttendance, fetchCirculars, fetchTimeTable, fetchUserDetails } from "../controllers/erpController.js";
 
 const erpRouter = Router();
 
-erpRouter.get("/getTimeTable", expressAsyncHandler(async (req, res) => {
-    res.send("Time table fetched and saved to /data/erp/timetable successfully");
-})); 
 
-erpRouter.get("/getAttendance", expressAsyncHandler(async (req, res) => {
-    res.send("Attendance fetched and saved to /data/erp/attendance successfully");
-}));
-
-erpRouter.get("/getCirculars", expressAsyncHandler(async (req, res) => {
-    res.send("Circulars fetched and saved to /data/erp/circulars successfully");
-}));
-
-erpRouter.get("/getUserDetails", expressAsyncHandler(async (req, res) => {
-    res.send("User details fetched and saved to /data/erp/userDetails successfully");
-}));
-
-erpRouter.get("/getAssignments", expressAsyncHandler(async (req, res) => {
-    res.send("Assignments fetched and saved to /data/erp/assignments successfully");
-}));
+erpRouter.get("/getAttendance", fetchAttendance);
+erpRouter.get("/getCirculars", fetchCirculars);
+erpRouter.get("/getUserDetails", fetchUserDetails);
+erpRouter.get("/getTimeTable", fetchTimeTable);
 
 
 export default erpRouter;
