@@ -1,11 +1,21 @@
 export class ApiError extends Error {
-  constructor(message, statusCode) {
+  constructor(statusCode, message, errors = [], stack = "") {
     super(message);
     this.statusCode = statusCode;
+    this.message = message;
+    this.errors = errors;
+    if (stack) {
+      this.stack = stack;
+    } else {
+      Error.captureStackTrace(this, this.constructor);
+    }
   }
 
-  static internal(message) {
-    return new ApiError(message || "Internal Server Error", 500);
+  static internal(message, error = null) {
+    return new ApiError(
+      message || error?.message || "Internal Server Error",
+      500
+    );
   }
 
   static badRequest(message) {
