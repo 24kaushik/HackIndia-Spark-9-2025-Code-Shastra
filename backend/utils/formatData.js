@@ -64,3 +64,27 @@ export function formatAttendance(rawData) {
     }))
   };
 }
+
+export function formatCirculars(rawData) {
+  if (!rawData || !rawData.state) {
+    throw new Error("Invalid input: missing 'state'");
+  }
+
+  // Parse state (stringified JSON array)
+  const circulars = typeof rawData.state === "string" 
+    ? JSON.parse(rawData.state) 
+    : rawData.state;
+
+  // Format into a clean structure
+  return {
+    circulars: circulars.map(item => ({
+      id: item.CirID,
+      serial_no: item.SNo,
+      subject: item.Subject,
+      description: item.Notice || "",
+      date_from: item.DateFrom,
+      date_to: item.DateTo,
+      issued_by: item.EmployeeName
+    }))
+  };
+}
