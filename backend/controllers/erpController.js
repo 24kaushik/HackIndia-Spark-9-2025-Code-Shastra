@@ -1,6 +1,13 @@
 import { ApiError } from "../utils/ApiError.js";
 import expressAsyncHandler from "express-async-handler";
-import { formatAttendance, formatCirculars, formatTimetable } from "../utils/formatData.js";
+import {
+  formatAttendance,
+  formatCirculars,
+  formatTimetable,
+} from "../utils/formatData.js";
+import fs from "fs";
+import path from "path";
+import { dataFolderLocation } from "../constants.js";
 
 export const fetchTimeTable = expressAsyncHandler(async (_, res) => {
   const url =
@@ -84,13 +91,39 @@ export const fetchCirculars = expressAsyncHandler(async (req, res) => {
 
     const formattedData = formatCirculars(data);
 
-    res.json(formattedData);
+    for (let i = 0; i < 5; i++) {
+      if (formattedData.circulars[i]) {
+        const response = await fetch(
+          "https://qums.quantumuniversity.edu.in/Web_Teaching/GetCircularAllDetails",
+          {
+            method: "POST",
+            body: JSON.stringify({ CirID: formattedData.circulars[i].id }),
+            headers: {
+              "Content-Type": "application/json",
+              Cookie: `ASP.NET_SessionId=${process.env.ERP_SESSION_ID}`,
+            },
+          }
+        );
+        const data = await response.json();
+        const circular = JSON.parse(data.state)[0].Circular; // base64 encoded pdf
+        const buffer = Buffer.from(circular, "base64");
+        const dir = path.join(dataFolderLocation, "circulars");
+        if (!fs.existsSync(dir)) {
+          fs.mkdirSync(dir, { recursive: true });
+        }
+        fs.writeFileSync(
+          path.join(dir, `circular_${formattedData.circulars[i].id}.pdf`),
+          buffer
+        );
+      }
+    }
 
+    res.json({ message: "saved" });
   } catch (error) {
     if (!response) {
       throw new ApiError(500, "Error connecting to ERP server", error);
     } else {
-      console.log(error)
+      console.log(error);
       throw new ApiError(
         401,
         "Session might have expired. Please update ERP_SESSION_ID in .env"
