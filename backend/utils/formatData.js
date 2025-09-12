@@ -1,3 +1,5 @@
+import { calculateEstimatePrice } from "./helperFunction.js";
+
 export function formatTimetable(rawData) {
   if (!rawData || !rawData.state) {
     throw new Error("Invalid input: missing 'state'");
@@ -71,8 +73,8 @@ export function formatCirculars(rawData) {
   }
 
   // Parse state (stringified JSON array)
-  const circulars = typeof rawData.state === "string" 
-    ? JSON.parse(rawData.state) 
+  const circulars = typeof rawData.state === "string"
+    ? JSON.parse(rawData.state)
     : rawData.state;
 
   // Format into a clean structure
@@ -87,4 +89,32 @@ export function formatCirculars(rawData) {
       issued_by: item.EmployeeName
     }))
   };
+}
+
+
+export function formatMatrixData(matrixData, locations) {
+  const { distances, durations } = matrixData;
+
+  const formatted = [];
+
+  for (let i = 0; i < locations.length; i++) {
+    for (let j = 0; j < locations.length; j++) {
+      if (i !== j) {
+        const distanceMeters = distances[i][j];
+        const durationSeconds = durations[i][j];
+
+        formatted.push({
+          from: locations[i].name,
+          to: locations[j].name,
+          from_coords: locations[i].coords,
+          to_coords: locations[j].coords,
+          distance_km: (distanceMeters / 1000).toFixed(2),
+          duration_min: (durationSeconds / 60).toFixed(2),
+          estimate_price: calculateEstimatePrice(distanceMeters, durationSeconds)
+        });
+      }
+    }
+  }
+
+  return formatted;
 }

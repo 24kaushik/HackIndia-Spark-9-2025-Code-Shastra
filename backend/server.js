@@ -8,6 +8,7 @@ import userRouter from './routes/userRoutes.js';
 import queryRouter from './routes/queryRoutes.js';
 import roomRouter from './routes/roomRoutes.js';
 import erpRouter from './routes/erpRoutes.js';
+import mapRouter from './routes/mapRoutes.js';
 
 
 // Initializations
@@ -30,6 +31,8 @@ app.use("/api/chat/room/create/:roomName/:userID", roomRouter); // Queryt routes
 // --------ERP Integration--------
 app.use("/api/v0/erp", erpRouter);
 
+// --------Maps Integration--------
+app.use("/api/v0/maps", mapRouter);
 
 
 // Error handling middleware
