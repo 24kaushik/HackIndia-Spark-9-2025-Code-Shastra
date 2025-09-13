@@ -8,6 +8,7 @@ import {
 import fs from "fs";
 import path from "path";
 import { dataFolderLocation } from "../constants.js";
+import { saveJSON } from "../utils/jsonSaver.js";
 
 export const fetchTimeTable = expressAsyncHandler(async (_, res) => {
   const url =
@@ -37,8 +38,9 @@ export const fetchTimeTable = expressAsyncHandler(async (_, res) => {
       );
     }
   }
-
-  res.send(formatTimetable(data));
+  const formattedData = formatTimetable(data);
+  saveJSON("timetable.json", formattedData);
+  res.send(formattedData);
 });
 
 export const fetchAttendance = expressAsyncHandler(async (_, res) => {
@@ -70,8 +72,9 @@ export const fetchAttendance = expressAsyncHandler(async (_, res) => {
       );
     }
   }
-
-  res.send(formatAttendance(data));
+  const formattedData = formatAttendance(data);
+  saveJSON("attendance.json", formattedData);
+  res.send(formattedData);
 });
 
 export const fetchCirculars = expressAsyncHandler(async (req, res) => {
@@ -166,6 +169,7 @@ export const fetchUserDetails = expressAsyncHandler(async (req, res) => {
       );
     }
   }
+  saveJSON("userDetails.json", data);
   res.send(data);
 });
 
