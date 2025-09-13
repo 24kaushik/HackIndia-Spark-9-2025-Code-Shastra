@@ -133,15 +133,114 @@ export const fetchCirculars = expressAsyncHandler(async (req, res) => {
 });
 
 export const fetchUserDetails = expressAsyncHandler(async (req, res) => {
-  // Logic to fetch user details from ERP and save to /data/erp/userDetails
-  res.send(
-    "User details fetched and saved to /data/erp/userDetails successfully"
-  );
+  const url =
+    "https://qums.quantumuniversity.edu.in/Web_StudentAcademic/GetStudentDetailOnRegID";
+  let response, data;
+
+  try {
+    response = await fetch(url, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Cookie: `ASP.NET_SessionId=${process.env.ERP_SESSION_ID}`,
+      },
+      body: JSON.stringify({
+        RegID: process.env.ERP_REG_ID || 9490, // My (Kaushik's) RegID. replace with yours to see your details
+      }),
+    });
+    data = await response.json();
+    if (data?.state) {
+      data = JSON.parse(data.state)[0];
+    } else {
+      throw new Error("Invalid response from ERP");
+    }
+
+    delete data["Photo"];
+  } catch (error) {
+    if (!response) {
+      throw new ApiError(500, "Error connecting to ERP server", error);
+    } else {
+      throw new ApiError(
+        401,
+        "Session might have expired. Please update ERP_SESSION_ID in .env"
+      );
+    }
+  }
+  res.send(data);
 });
 
 export const fetchAssignments = expressAsyncHandler(async (req, res) => {
-  // Logic to fetch assignments from ERP and save to /data/erp/assignments
-  res.send(
-    "Assignments fetched and saved to /data/erp/assignments successfully"
-  );
+  const url =
+    "https://qums.quantumuniversity.edu.in/Web_StudentAcademic/GetStudentAssignment";
+  let response, data;
+
+  try {
+    response = await fetch(url, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Cookie: `ASP.NET_SessionId=${process.env.ERP_SESSION_ID}`,
+      },
+      body: JSON.stringify({
+        RegID: process.env.ERP_REG_ID || 9490,
+      }),
+    });
+
+    data = await response.json();
+    if (!data?.state) {
+      throw new Error("Invalid response from ERP");
+    }
+
+    data = JSON.parse(data.state);
+    const assignmentPromises = data.map(async (element) => {
+      try {
+        const imageResponse = await fetch(
+          "https://qums.quantumuniversity.edu.in/Web_Teaching/GetAssignmentImage",
+          {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              Cookie: `ASP.NET_SessionId=${process.env.ERP_SESSION_ID}`,
+            },
+            body: JSON.stringify({
+              AssignmentDetailID: element.AssignmentDetailID,
+            }),
+          }
+        );
+
+        const imageData = await imageResponse.json();
+        if (imageData?.data) {
+          const assignment = JSON.parse(imageData.data)[0];
+          const buffer = Buffer.from(assignment.Assignment, "base64");
+          const dir = path.join(dataFolderLocation, "assignments");
+          if (!fs.existsSync(dir)) {
+            fs.mkdirSync(dir, { recursive: true });
+          }
+
+          const filePath = path.join(
+            dir,
+            `assignment_${element.CLASSSUBJECT}_${element.AssignmentDetailID}.${assignment.imageExtension?.trim()}`
+          );
+          fs.writeFileSync(filePath, buffer);
+          element.filePath = filePath;
+        }
+        return element;
+      } catch (err) {
+        console.error("Error fetching assignment image:", err);
+        return element;
+      }
+    });
+
+    const processedData = await Promise.all(assignmentPromises);
+    res.send(processedData);
+  } catch (error) {
+    if (!response) {
+      throw new ApiError(500, "Error connecting to ERP server", error);
+    } else {
+      throw new ApiError(
+        401,
+        "Session might have expired. Please update ERP_SESSION_ID in .env"
+      );
+    }
+  }
 });
