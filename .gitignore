@@ -32,5 +32,8 @@ node_modules
 venv
 
 # ------------------------------------MISC--------------------------------------
-data/
+# Ignore everything in data directory
+data/*
+# But keep the directory itself with a .gitkeep file
+!data/
 !data/.gitkeep
